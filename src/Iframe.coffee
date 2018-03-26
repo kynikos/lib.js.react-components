@@ -11,23 +11,40 @@ ReactDOMServer = require('react-dom/server')
 class module.exports extends Component
     render: ->
         createElement('iframe', {
-            style: {display: 'none'}
+            # Setting display:none makes it unprintable in Chrome
+            style: {
+                width: '0'
+                height: '0'
+                border: 'none'
+                margin: '0'
+            }
         })
 
     componentDidMount: ->
         @componentDidUpdate()
 
     componentDidUpdate: ->
+        # TODO: Use the following if browsers stop supporting document.write()
+        #       The problem is that this won't render any external images
+        #       embedded with <img> elements
+        # iframe = ReactDOM.findDOMNode(this)
+        # if iframe
+        #     iframe.src = URL.createObjectURL(new Blob([
+        #         ReactDOMServer.renderToString(@props.html)
+        #     ], {type: 'text/html'}))
+
         iframe = ReactDOM.findDOMNode(this)
-        if iframe.contentWindow
-            iframe.contentWindow.document.open()
-            iframe.contentWindow.document.write(
+        doc = iframe.contentDocument
+        if doc
+            doc.open()
+            doc.write(
                 "<!doctype html>\n" +
                 ReactDOMServer.renderToString(@props.html)
             )
-            iframe.contentWindow.document.close()
+            doc.close()
 
     print: ->
         iframe = ReactDOM.findDOMNode(this)
-        if iframe.contentWindow
-            iframe.contentWindow.print()
+        win = iframe.contentWindow
+        if win
+            win.print()

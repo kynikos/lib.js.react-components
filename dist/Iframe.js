@@ -38,8 +38,12 @@ function _inherits(subClass, superClass) { if (typeof superClass !== "function" 
       key: 'render',
       value: function render() {
         return createElement('iframe', {
+          // Setting display:none makes it unprintable in Chrome
           style: {
-            display: 'none'
+            width: '0',
+            height: '0',
+            border: 'none',
+            margin: '0'
           }
         });
       }
@@ -51,21 +55,31 @@ function _inherits(subClass, superClass) { if (typeof superClass !== "function" 
     }, {
       key: 'componentDidUpdate',
       value: function componentDidUpdate() {
-        var iframe;
+        var doc, iframe;
+        // TODO: Use the following if browsers stop supporting document.write()
+        //       The problem is that this won't render any external images
+        //       embedded with <img> elements
+        // iframe = ReactDOM.findDOMNode(this)
+        // if iframe
+        //     iframe.src = URL.createObjectURL(new Blob([
+        //         ReactDOMServer.renderToString(@props.html)
+        //     ], {type: 'text/html'}))
         iframe = ReactDOM.findDOMNode(this);
-        if (iframe.contentWindow) {
-          iframe.contentWindow.document.open();
-          iframe.contentWindow.document.write("<!doctype html>\n" + ReactDOMServer.renderToString(this.props.html));
-          return iframe.contentWindow.document.close();
+        doc = iframe.contentDocument;
+        if (doc) {
+          doc.open();
+          doc.write("<!doctype html>\n" + ReactDOMServer.renderToString(this.props.html));
+          return doc.close();
         }
       }
     }, {
       key: 'print',
       value: function print() {
-        var iframe;
+        var iframe, win;
         iframe = ReactDOM.findDOMNode(this);
-        if (iframe.contentWindow) {
-          return iframe.contentWindow.print();
+        win = iframe.contentWindow;
+        if (win) {
+          return win.print();
         }
       }
     }]);
