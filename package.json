@@ -12,14 +12,14 @@
     "react"
   ],
   "dependencies": {
-    "react": "^16.2.0",
-    "react-dom": "^16.2.0"
+    "react": "^16.8.6",
+    "react-dom": "^16.8.6"
   },
   "devDependencies": {
-    "babel-core": "^6.26.0",
-    "babel-preset-env": "^1.6.1",
+    "babel-core": "^6.26.3",
+    "babel-preset-env": "^1.7.0",
     "coffeelint": "^2.1.0",
-    "coffeescript": "^2.1.1"
+    "coffeescript": "^2.4.1"
   },
   "babel": {
     "presets": [
