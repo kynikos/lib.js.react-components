@@ -11,19 +11,23 @@
   "keywords": [
     "react"
   ],
+  "scripts": {
+    "compile": "./node_modules/.bin/babel src --out-dir dist"
+  },
   "dependencies": {
     "react": "^16.8.6",
     "react-dom": "^16.8.6"
   },
   "devDependencies": {
-    "babel-core": "^6.26.3",
-    "babel-preset-env": "^1.7.0",
-    "coffeelint": "^2.1.0",
-    "coffeescript": "^2.4.1"
+    "@babel/cli": "^7.4.3",
+    "@babel/core": "^7.4.3",
+    "@babel/preset-env": "^7.4.3",
+    "eslint": "^5.16.0",
+    "eslint-plugin-babel": "^5.3.0"
   },
   "babel": {
     "presets": [
-      "env"
+      "@babel/preset-env"
     ]
   }
 }
