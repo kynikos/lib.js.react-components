@@ -44,7 +44,7 @@ function (_Component) {
   _createClass(Iframe, [{
     key: "render",
     value: function render() {
-      createElement('iframe', {
+      return createElement('iframe', {
         // Setting display:none makes it unprintable in Chrome
         style: {
           width: '0',

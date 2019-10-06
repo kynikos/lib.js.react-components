@@ -10,7 +10,7 @@ const ReactDOMServer = require('react-dom/server')
 
 module.exports = class Iframe extends Component {
   render() {
-    createElement('iframe', {
+    return createElement('iframe', {
       // Setting display:none makes it unprintable in Chrome
       style: {
         width: '0',
