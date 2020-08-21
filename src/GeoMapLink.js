@@ -3,10 +3,10 @@
 // Licensed under MIT
 // https://github.com/kynikos/lib.js.react-components/blob/master/LICENSE
 
-const {createElement: h, Children} = require('react')
+import {createElement as h, Children} from 'react'
 
 
-module.exports = function GeoMapLink({
+export function GeoMapLink({
   query,
   lat = 0,
   lon = 0,

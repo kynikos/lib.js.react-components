@@ -11,9 +11,6 @@
   "keywords": [
     "react"
   ],
-  "scripts": {
-    "compile": "./node_modules/.bin/babel src --out-dir dist"
-  },
   "dependencies": {
     "react": "^16.13.1",
     "react-dom": "^16.13.1",

@@ -3,12 +3,12 @@
 // Licensed under MIT
 // https://github.com/kynikos/lib.js.react-components/blob/master/LICENSE
 
-const {Component, createElement} = require('react')
-const ReactDOM = require('react-dom')
-const ReactDOMServer = require('react-dom/server')
+import {Component, createElement} from 'react'
+import ReactDOM from 'react-dom'
+import ReactDOMServer from 'react-dom/server'
 
 
-module.exports = class Iframe extends Component {
+export class Iframe extends Component {
   render() {
     return createElement('iframe', {
       // Setting display:none makes it unprintable in Chrome
