@@ -9,8 +9,8 @@ import {PopupWindow} from './PopupWindow'
 
 
 export function PopupWindowButton({
-  icon, label, windowName, width, height, center, windowFeaturesObject,
-  windowFeaturesString, makeContent,
+  icon, label, windowUrl, windowName, width, height, center,
+  windowFeaturesObject, windowFeaturesString, makeContent,
 }) {
   const [state, setState] = useState({
     visible: false,
@@ -60,6 +60,7 @@ export function PopupWindowButton({
       loading: state.loading,
       setWindowState: setState,
       externalWindow,
+      windowUrl,
       windowName,
       width,
       height,
