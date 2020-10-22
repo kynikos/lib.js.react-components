@@ -12,16 +12,16 @@
     "react"
   ],
   "dependencies": {
-    "antd": "^4.6.5",
-    "react": "^16.13.1",
-    "react-dom": "^16.13.1",
+    "antd": "^4.7.2",
+    "react": "^17.0.1",
+    "react-dom": "^17.0.1",
     "signature_pad": "^3.0.0-beta.4"
   },
   "devDependencies": {
-    "@babel/cli": "^7.11.6",
-    "@babel/core": "^7.11.6",
-    "@babel/preset-env": "^7.11.5",
-    "eslint": "^7.9.0",
+    "@babel/cli": "^7.12.1",
+    "@babel/core": "^7.12.3",
+    "@babel/preset-env": "^7.12.1",
+    "eslint": "^7.11.0",
     "eslint-plugin-babel": "^5.3.1"
   },
   "babel": {
