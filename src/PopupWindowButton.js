@@ -4,13 +4,15 @@
 // https://github.com/kynikos/lib.js.react-components/blob/master/LICENSE
 
 import {createElement as h, useState, useRef} from 'react'
-import Button from 'antd/lib/button'
 import {PopupWindow} from './PopupWindow'
 
 
 export function PopupWindowButton({
-  icon, label, windowUrl, windowName, width, height, center,
-  windowFeaturesObject, windowFeaturesString, makeContent,
+  Button, icon, label, title, size, loading, windowUrl, windowInitialHtml,
+  beforeMakingContent, windowName, windowTitle, windowWidth, windowHeight,
+  windowCenter, windowFeaturesObject, windowFeaturesString, nameToOpenWindowRef,
+  beforeOpenAlways, beforeOpenIfNotAlready, makeWindowReactContent,
+  handleWindowUnload,
 }) {
   const [state, setState] = useState({
     visible: false,
@@ -22,9 +24,16 @@ export function PopupWindowButton({
   return h(Button,
     {
       icon,
-      loading: state.loading,
-      onClick: (event) => {
-        event.preventDefault()
+      title,
+      size,
+      loading: loading || state.loading,
+      onClick: async () => {
+        setState({
+          visible: state.visible,
+          loading: true,
+        })
+
+        beforeOpenAlways && await beforeOpenAlways()
 
         if (state.visible && externalWindow.current) {
           if (state.loading) {
@@ -34,20 +43,30 @@ export function PopupWindowButton({
             // PopupWindow handles 'unload', so that should always reset
             // 'visible' to false when it's closed, and this condition should
             // never be reached, anyway handle this just for safety
-            (async () => {
-              await setState({
-                visible: false,
-                loading: false,
-              })
-              setState({
-                visible: true,
-                loading: true,
-              })
-            })()
+            await setState({
+              visible: false,
+              loading: false,
+            })
+            setState({
+              visible: true,
+              loading: true,
+            })
           } else {
+            await setState({
+              visible: true,
+              loading: false,
+            })
             externalWindow.current.focus()
           }
+        } else if (nameToOpenWindowRef && windowName in nameToOpenWindowRef) {
+          // A window with the same name may have been opened by another button
+          nameToOpenWindowRef[windowName].current.focus()
+          setState({
+            visible: state.visible,
+            loading: false,
+          })
         } else {
+          beforeOpenIfNotAlready && await beforeOpenIfNotAlready()
           setState({
             visible: true,
             loading: true,
@@ -60,14 +79,19 @@ export function PopupWindowButton({
       loading: state.loading,
       setWindowState: setState,
       externalWindow,
+      nameToOpenWindowRef,
       windowUrl,
+      windowInitialHtml,
+      beforeMakingContent,
       windowName,
-      width,
-      height,
-      center,
+      windowTitle,
+      width: windowWidth,
+      height: windowHeight,
+      center: windowCenter,
       windowFeaturesObject,
       windowFeaturesString,
-      makeContent,
+      makeReactContent: makeWindowReactContent,
+      handleUnload: handleWindowUnload,
     }),
   )
 }

@@ -14,35 +14,50 @@ export const PopupWindow = memo(function PopupWindow({
   // Do keep 'loading' here, even if it's not explicitly used, because I need
   // the component to react to its change in value
   loading, // Keep 'loading' here
-  setWindowState, externalWindow, windowUrl, windowName, width, height, center,
-  windowFeaturesObject, windowFeaturesString, makeContent,
+  setWindowState, externalWindow, nameToOpenWindowRef, windowUrl,
+  windowInitialHtml, beforeMakingContent, windowName, windowTitle,
+  width, height, center, windowFeaturesObject, windowFeaturesString,
+  makeReactContent, handleUnload,
 }) {
   const containerElement = useRef(null)
 
   useEffect(() => {
+    if (externalWindow.current) {
+      // BUG: For some reason, when closing the window explicitly with
+      //    window.close() (for example with a Cancel/Close button), the
+      //    component is remounted, and thus useEffect() recalled
+      return
+    }
+
     openWindow({
       setWindowState,
       externalWindow,
+      nameToOpenWindowRef,
       windowUrl,
+      windowInitialHtml,
+      beforeMakingContent,
       windowName,
+      windowTitle,
       width,
       height,
       center,
       windowFeaturesObject,
       windowFeaturesString,
       containerElement,
+      handleUnload,
     })
 
     // The ref value 'externalWindow.current' may change by the time the effect
-    // cleanup function runs, so always update the value here
-    const currentExternalWindow = externalWindow.current
-
-    return () => closeWindow(currentExternalWindow, setWindowState)
+    // cleanup function runs, so just use externalWindow here
+    return () => closeWindow(externalWindow)
   }, [])
 
   if (!containerElement.current) return null
 
-  return createPortal(makeContent(externalWindow), containerElement.current)
+  return createPortal(
+    makeReactContent(externalWindow),
+    containerElement.current,
+  )
 })
 
 
@@ -65,9 +80,17 @@ function makeWindowFeatures(object) {
 
 
 function openWindow({
-  setWindowState, externalWindow, windowUrl, windowName, width, height, center,
-  windowFeaturesObject, windowFeaturesString, containerElement,
+  setWindowState, externalWindow, nameToOpenWindowRef, windowUrl,
+  windowInitialHtml, beforeMakingContent, windowName, windowTitle,
+  width, height, center, windowFeaturesObject, windowFeaturesString,
+  containerElement, handleUnload,
 }) {
+  if (nameToOpenWindowRef && windowName in nameToOpenWindowRef) {
+    // It's not easy to handle the case whereby a window with the same name may
+    // already be open
+    throw new Error(`A window name ${windowName} is already open`)
+  }
+
   let windowFeaturesObjectMerged = {}
 
   if (windowFeaturesObject) {
@@ -94,13 +117,33 @@ function openWindow({
     windowFeaturesArray.push(windowFeaturesString)
   }
 
-  externalWindow.current = window.open(
+  const windowObj = window.open(
     windowUrl,
     windowName,
     windowFeaturesArray.join(','),
   )
 
+  if (!windowObj) {
+    // The window couldn't be opened but no native error was raised
+    throw new WindowOpenError()
+  }
+
+  externalWindow.current = windowObj
+
+  if (nameToOpenWindowRef) {
+    nameToOpenWindowRef[windowName] = externalWindow
+  }
+
   externalWindow.current.onload = () => {
+    if (windowTitle) {
+      externalWindow.current.document.title = windowTitle
+    }
+
+    windowInitialHtml &&
+      externalWindow.current.document.write(windowInitialHtml)
+
+    beforeMakingContent && beforeMakingContent(externalWindow)
+
     containerElement.current =
       externalWindow.current.document.createElement('div')
 
@@ -111,17 +154,29 @@ function openWindow({
     setWindowState({visible: true, loading: false})
 
     externalWindow.current.addEventListener('unload', (event) => {
-      // This is called when the user closes the window manually
+      externalWindow.current = null
+      if (nameToOpenWindowRef && windowName in nameToOpenWindowRef) {
+        delete nameToOpenWindowRef[windowName]
+      }
       setWindowState({visible: false, loading: false})
+      handleUnload && handleUnload()
     })
   }
 }
 
 
-function closeWindow(currentExternalWindow, setWindowState) {
+function closeWindow(externalWindow) {
   // This is called when the component gets unmounted, but not when the
   // user closes the window manually; for that there's the 'unload' handler
   // above
-  setWindowState({visible: false, loading: false})
-  currentExternalWindow.close()
+  // window.close() triggers the 'unload' event
+  externalWindow.current && externalWindow.current.close()
+}
+
+
+export class WindowOpenError extends Error {
+  constructor(message) {
+    super(message)
+    this.name = this.constructor.name
+  }
 }
